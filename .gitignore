@@ -1,0 +1,8 @@
+.DS_Store
+*.pyc
+MANIFEST
+dnsmasq.conf
+resolv.conf
+dnsmasq.gen.egg-info
+dist
+fabfile.py

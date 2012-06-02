@@ -1,0 +1,27 @@
+# misc
+# internet
+internet:
+  dns: ['208.67.222.222', '114.114.114.114']
+  items:
+    - d3qnbzt7ix5jlv.cloudfront.net
+    - mirror.internode.on.net
+    - releases.ubuntu.mirrors.uk2.net
+    - mirrors.virginmedia.com
+    - d3qnbzt7ix5jlv.hkg1.cloudfront.net
+
+# ethernet
+ethernet:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - service.lixian.vip.xunlei.com
+    - passport.360buy.com
+    - hub5pr.sandai.net
+    - plugin.xl7.xunlei.com
+    - t2756.sandai.net
+    - cc00040.h.cncssr.chinacache.net
+    - client.stat.xunlei.com
+    - biz5.co.sandai.net
+    - hub5pnc.sandai.net
+    - hub4t.sandai.net
+    - cnchub5u.sandai.net
+    - wireless.mapbar.com

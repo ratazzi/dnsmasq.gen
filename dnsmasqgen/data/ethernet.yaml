@@ -1,0 +1,88 @@
+# youku
+youku:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - g1.ykimg.com
+    - g2.ykimg.com
+    - g3.ykimg.com
+    - g4.ykimg.com
+    - res.mfs.ykimg.com
+    - static.atm.youku.com
+    - html.atm.youku.com
+    - urchin.lstat.youku.com
+    - e.stat.youku.com
+    - static.youku.com
+    - v.youku.com
+    - lstat.youku.com
+    - www.youku.com
+    - f.youku.com
+
+# tudou
+tudou:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - at-img1.tdimg.com
+    - at-img2.tdimg.com
+    - at-img3.tdimg.com
+    - at-img4.tdimg.com
+    - css.tudouui.com
+    - js.tudouui.com
+    - ui.tudou.com
+    - b.scorecardresearch.com
+    - stats.tudou.com
+    - www.tudou.com
+    - i1.tdimg.com
+    - i2.tdimg.com
+    - i3.tdimg.com
+    - i4.tdimg.com
+    - v2.tudou.com
+    - tjpt.my.tudou.com
+
+# mac qq
+macqq:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - im.qq.com
+    - im-img.qq.com
+    - pingjs.qq.com
+    - pingfore.qq.com
+
+# 360buy
+360buy:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - misc.360buyimg.com
+    - wl.360buy.com
+    - img10.360buyimg.com
+    - img11.360buyimg.com
+    - img12.360buyimg.com
+    - img13.360buyimg.com
+    - img14.360buyimg.com
+    - passport.360buy.com
+    - qiang.360buy.com
+    - csc.360buy.com
+    - chongzhi.360buy.com
+    - www.360buy.com
+
+# 51buy
+51buy:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - st.51buy.com
+    - st.icson.com
+    - img2.icson.com
+    - a1.shop.qq.com
+    - virtual.paipai.com
+    - act.51buy.com
+    - mat1.gtimg.com
+    - static.paipaiimg.com
+    - trace.qq.com
+    - stat.51buy.com
+    - isdspeed.qq.com
+    - service.paipai.com
+
+# taobao
+taobao:
+  dns: ['202.96.134.133', '114.114.114.114']
+  items:
+    - img.gslb.tbcache.com
