@@ -19,7 +19,6 @@ setup(
     install_requires=[
         'dnspython',
         'pyyaml',
-        'eventlet',
     ],
     include_package_data=True,
     license='BSD License',

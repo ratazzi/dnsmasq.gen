@@ -5,12 +5,11 @@ import sys
 import subprocess
 import re
 import yaml
-import eventlet
+import Queue
 import dns.resolver
+import socket
 from optparse import OptionParser
-from eventlet.green import socket
 socket.setdefaulttimeout(30)
-eventlet.monkey_patch(all=True)
 
 # ping 测试次数
 NUMBER_OF_PING = 5
@@ -51,11 +50,9 @@ class DnsmasqGen(object):
 
     def nslookup(self, domain, nameservers):
         items = []
-        rs_queue = eventlet.queue.Queue()
-        pool = eventlet.GreenPool()
+        rs_queue = Queue.Queue()
         for nameserver in nameservers:
-            pool.spawn(self._nslookup, domain, nameserver, rs_queue)
-        pool.waitall()
+            self._nslookup(domain, nameserver, rs_queue)
         while rs_queue.qsize():
             items.append(rs_queue.get())
         return set(items)
@@ -85,11 +82,9 @@ class DnsmasqGen(object):
 
         # 获取每条记录的平均响应时间
         rows = {domain: dict()}
-        pool = eventlet.GreenPool()
-        rs_queue = eventlet.queue.Queue()
+        rs_queue = Queue.Queue()
         for record in self.nslookup(domain, dns):
-            pool.spawn(self.ping, record, rs_queue)
-        pool.waitall()
+            self.ping(record, rs_queue)
         while rs_queue.qsize():
             (avg, ip) = rs_queue.get()
             rows[domain][avg] = ip
@@ -125,10 +120,8 @@ class DnsmasqGen(object):
             name = domains[0]
         _o('# %s' % name)
 
-        pool = eventlet.GreenPool()
         for line in domains:
-            pool.spawn(self._section, line, dns)
-        pool.waitall()
+            self._section(line, dns)
 
 def parse_command_line():
     # command line options
