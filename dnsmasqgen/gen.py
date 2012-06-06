@@ -13,6 +13,7 @@ socket.setdefaulttimeout(30)
 
 # ping 测试次数
 NUMBER_OF_PING = 5
+MAX_OF_PING_PROCESS = 5
 
 # 一个未被污染的以及一个本地 DNS
 DEFAULT_DNS = ('208.67.222.222', '202.96.134.133')
@@ -57,21 +58,32 @@ class DnsmasqGen(object):
             items.append(rs_queue.get())
         return set(items)
 
-    def ping(self, ip, queue):
-        cmd = 'ping -c %d %s' % (NUMBER_OF_PING, ip)
+    def _ping(self, addr):
+        cmd = 'ping -c %d %s' % (NUMBER_OF_PING, addr)
         try:
             p = subprocess.Popen(cmd, shell=True,
                     stdout=subprocess.PIPE)
-            p.wait()
-            output = p.stdout.read()
+            # p.wait()
+            # output = p.stdout.read()
+            return (addr, p)
         except Exception, e:
             sys.stderr.write('%s\n' % str(e))
             sys.stderr.flush()
-            return
-        times = re.findall(r'time=([0-9\.]{1,7})\sms', output)
-        if len(times):
-            _avg = self.avg(times)
-            queue.put((_avg, ip))
+
+    def ping(self, addrs, queue):
+        for i in range(0, len(addrs), MAX_OF_PING_PROCESS):
+            items = addrs[i:i + MAX_OF_PING_PROCESS]
+            pool = []
+            for addr in items:
+                (addr, p) = self._ping(addr)
+                pool.append((addr, p))
+            for addr, p in pool:
+                p.wait()
+                output = p.stdout.read()
+                times = re.findall(r'time=([0-9\.]{1,7})\sms', output)
+                if len(times):
+                    _avg = self.avg(times)
+                    queue.put((_avg, addr))
 
     def _section(self, line, dns):
         domain = line.rstrip()
@@ -83,8 +95,9 @@ class DnsmasqGen(object):
         # 获取每条记录的平均响应时间
         rows = {domain: dict()}
         rs_queue = Queue.Queue()
-        for record in self.nslookup(domain, dns):
-            self.ping(record, rs_queue)
+        # for record in self.nslookup(domain, dns):
+        #     self.ping(record, rs_queue)
+        self.ping(list(self.nslookup(domain, dns)), rs_queue)
         while rs_queue.qsize():
             (avg, ip) = rs_queue.get()
             rows[domain][avg] = ip
