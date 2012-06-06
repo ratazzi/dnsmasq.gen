@@ -2,13 +2,13 @@
 # coding=utf-8
 
 import sys
-import subprocess
-import re
 import yaml
 import Queue
 import dns.resolver
 import socket
 from optparse import OptionParser
+import latency
+
 socket.setdefaulttimeout(30)
 
 # ping 测试次数
@@ -27,12 +27,8 @@ class DnsmasqGen(object):
         self.verbose = False
         self.debug = False
         self.output = False
-
-    def avg(self, times):
-        sum = 0
-        for t in times:
-            sum += float(t)
-        return sum / len(times)
+        self.python_ping = False
+        self.max_of_ping_process = MAX_OF_PING_PROCESS
 
     def _nslookup(self, domain, nameserver, queue):
         """
@@ -43,11 +39,10 @@ class DnsmasqGen(object):
         try:
             for row in resolver.query(domain):
                 queue.put(str(row))
-        except dns.resolver.NoNameservers:
-            pass
+        # except dns.resolver.NoNameservers:
+        #     pass
         except Exception:
             pass
-        return
 
     def nslookup(self, domain, nameservers):
         items = []
@@ -58,33 +53,6 @@ class DnsmasqGen(object):
             items.append(rs_queue.get())
         return set(items)
 
-    def _ping(self, addr):
-        cmd = 'ping -c %d %s' % (NUMBER_OF_PING, addr)
-        try:
-            p = subprocess.Popen(cmd, shell=True,
-                    stdout=subprocess.PIPE)
-            # p.wait()
-            # output = p.stdout.read()
-            return (addr, p)
-        except Exception, e:
-            sys.stderr.write('%s\n' % str(e))
-            sys.stderr.flush()
-
-    def ping(self, addrs, queue):
-        for i in range(0, len(addrs), MAX_OF_PING_PROCESS):
-            items = addrs[i:i + MAX_OF_PING_PROCESS]
-            pool = []
-            for addr in items:
-                (addr, p) = self._ping(addr)
-                pool.append((addr, p))
-            for addr, p in pool:
-                p.wait()
-                output = p.stdout.read()
-                times = re.findall(r'time=([0-9\.]{1,7})\sms', output)
-                if len(times):
-                    _avg = self.avg(times)
-                    queue.put((_avg, addr))
-
     def _section(self, line, dns):
         domain = line.rstrip()
         pan_analytic = False
@@ -94,12 +62,12 @@ class DnsmasqGen(object):
 
         # 获取每条记录的平均响应时间
         rows = {domain: dict()}
-        rs_queue = Queue.Queue()
-        # for record in self.nslookup(domain, dns):
-        #     self.ping(record, rs_queue)
-        self.ping(list(self.nslookup(domain, dns)), rs_queue)
-        while rs_queue.qsize():
-            (avg, ip) = rs_queue.get()
+        if self.python_ping:
+            ping = latency.Ping()
+        else:
+            ping = latency.LocalPing()
+        for avg, ip in ping(list(self.nslookup(domain, dns)),
+                self.max_of_ping_process, NUMBER_OF_PING):
             rows[domain][avg] = ip
 
         if len(rows[domain]) == 0:
@@ -146,8 +114,15 @@ def parse_command_line():
     parser.add_option('--debug', dest='debug', action='store_true',
         help='output to standard output', default=False)
 
+    parser.add_option('--python-ping', dest='python_ping', action='store_true',
+        help='use pure python ping, must run with root privilege',
+        default=False)
+
     parser.add_option('--list', dest='list', action='store_true',
         help='list all sections', default=False)
+
+    parser.add_option('--ping-process', dest='max_of_ping_process', type='int',
+        action='store', help='maximal ping processes.')
 
     parser.add_option('--input', dest='input', type='string', action='store',
         help='read domains from file')
@@ -170,6 +145,9 @@ def main():
     dnsmasq_gen = DnsmasqGen()
     dnsmasq_gen.debug = options.debug
     dnsmasq_gen.verbose = options.verbose
+    dnsmasq_gen.python_ping = options.python_ping
+    if options.max_of_ping_process:
+        dnsmasq_gen.max_of_ping_process = options.max_of_ping_process
     # dnsmasq_gen.output = options.output
 
     if options.input:

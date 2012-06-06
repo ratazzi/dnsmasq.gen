@@ -23,6 +23,9 @@ dnsmasq.gen 是一个辅助工具，用于根据域名自动生成 [Dnsmasq][dns
     dnsmasq.gen --input internet.yaml --section apple --verbose > dnsmasq.conf
     dnsmasq.gen --input internet.yaml --all --verbose > dnsmasq.conf
 
+    # 使用 python 实现的 ping，速度会快一些，但是需要 root 权限
+    dnsmasq.gen --input internet.yaml --section apple --verbose --python-ping
+
 ## 备注
 本程序仅仅为辅助工具，因为仅仅通过 ping 来测试速度，不能保证一定准确。
 某些网站不适合通过这种方案优化，比如远程服务器禁止 ping，Dropbox 没有 CDN 并且同一域名经常解析出来不是同一 ip 等。
